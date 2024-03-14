@@ -1,12 +1,15 @@
-import os
 from openai import OpenAI
+   
+key_path = './apiKey.txt'
+with open(key_path, 'r') as file:
+    key = file.readline().strip()
+print("key", key)
+
+client = OpenAI(
+    api_key = key
+)
 
 def get_gpt4_response(prompt):
-    client = OpenAI(
-        
-        api_key = "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" # to set environment variable run setx OPENAI_API_KEY "insert key"
-    )
-
     chat_completion = client.chat.completions.create(
         messages=[
             {
