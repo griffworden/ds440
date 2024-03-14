@@ -3,7 +3,8 @@ from openai import OpenAI
 
 def get_gpt4_response(prompt):
     client = OpenAI(
-        api_key= "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" # to set environment variable run setx OPENAI_API_KEY "insert key"
+        
+        api_key = "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" # to set environment variable run setx OPENAI_API_KEY "insert key"
     )
 
     chat_completion = client.chat.completions.create(
