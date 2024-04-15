@@ -4,4 +4,4 @@ Generate_counterfactuals builds on this by loading in the pretrained models and 
 to save on processing time and then outlines the prompting pipeline used to generate and
 evaluate counterfactual sentences by utilizing the OpenAi API.
 
-The dataset used can be found here: 
+The dataset used for training and validation can be found under the Data directory.
