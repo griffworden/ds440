@@ -7,3 +7,4 @@ openai
 python-Levenshtein
 protobuf
 numpy
+tf-keras
