@@ -6,5 +6,4 @@ transformers
 openai
 python-Levenshtein
 protobuf
-nump
-os
+numpy
