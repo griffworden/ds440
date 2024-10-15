@@ -15,7 +15,7 @@ import os
 app = Flask(__name__)  # This creates the Flask application instance
 CORS(app)  # Enable CORS for all routes
 
-API_KEY = ""  # Replace with your actual OpenAI API key
+API_KEY = os.getenv("OPENAI_API_KEY")  # Replace with your actual OpenAI API key
 classifier = None  # Define the classifier variable at the global level
 
 
@@ -137,7 +137,7 @@ def load_classifier():
 def classify_text():
     try:
         data = request.json
-        api_key = ''  # Replace with your actual OpenAI API key
+        api_key = os.getenv("OPENAI_API_KEY")  # Replace with your actual OpenAI API key
 
         classifier = CovidNewsClassifier(api_key)
         predictions, confidence = classifier.classify_text(data['text'])
