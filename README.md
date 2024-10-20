@@ -4,4 +4,5 @@ Generate_counterfactuals builds on this by loading in the pretrained models and 
 to save on processing time and then outlines the prompting pipeline used to generate and
 evaluate counterfactual sentences by utilizing the OpenAi API.
 
-The dataset used for training and validation can be found under the Data directory.
+The front end folder contains the code for the flask app as well as the html code that goes with it.
+This html file is also hosted at https://my.up.ist.psu.edu/ggw5057/DS440/index.html
