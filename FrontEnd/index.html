@@ -19,10 +19,11 @@
 
         .container {
             width: 100%;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
+            padding: 20px;
         }
 
         .content-box {
@@ -47,6 +48,21 @@
             height: 4px;
             background-color: #D22B2B;
             margin-bottom: 20px;
+        }
+
+        .explanation-box {
+            background-color: rgba(43, 45, 66, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .explanation-title {
+            font-weight: bold;
+            color: #D22B2B;
+            margin-bottom: 10px;
         }
 
         .input-area {
@@ -104,52 +120,95 @@
             font-size: 40px;
         }
 
-        .result.true {
-            color: green;
+        .result-fake {
+            color: #D22B2B;
         }
 
-        .result.false {
-            color: red;
+        .result-real {
+            color: #2B8A3E;
         }
 
-        .percentage-container {
+        .model-results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
             margin-top: 20px;
+        }
+
+        .model-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             text-align: center;
         }
 
-        @property --progress-value {
-            syntax: "<integer>";
-            initial-value: 0;
-            inherits: false;
+        .model-name {
+            font-weight: bold;
+            margin-bottom: 10px;
         }
 
-        @keyframes progress {
-            to {
-                --progress-value: 75;
-            }
+        .model-prediction {
+            font-size: 18px;
+        }
+
+        .prediction-real {
+            color: #2B8A3E;
+        }
+
+        .prediction-fake {
+            color: #D22B2B;
+        }
+
+        .percentage-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
         }
 
         .circular-progress {
-            visibility: hidden; /* Hide progress bar by default */
             position: relative;
-            display: inline-block;
             width: 150px;
             height: 150px;
             border-radius: 50%;
-            background:
-                radial-gradient(closest-side, white 79%, transparent 80% 100%),
-                conic-gradient(hotpink calc(var(--progress-value) * 1%), pink 0);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            visibility: hidden;
         }
 
         .circular-progress::before {
-            content: var(--progress-value) '%'; /* Use the progress value */
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 24px;
+            content: attr(data-value) '%';
+            font-size: 28px;
             font-weight: bold;
             color: rgba(43, 45, 66, 1);
+            margin-bottom: 5px;
+        }
+
+        .progress-label {
+            position: absolute;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 35px;
+        }
+
+        .progress-disclaimer {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            max-width: 300px;
+            display: none;
+        }
+
+        .loading-indicator {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 20px;
+            color: #D22B2B;
         }
     </style>
 </head>
@@ -158,17 +217,39 @@
         <div class="content-box">
             <div class="header">FAKE NEWS DETECTOR</div>
             <div class="divider"></div>
+            
+            <div id="explanation-section" class="explanation-box">
+                <div class="explanation-title">How it works:</div>
+                <p><strong>Latent Features:</strong> These are hidden patterns in the text that our AI models use to detect fake news. They include writing style, emotional tone, and credibility indicators.</p>
+                <p><strong>Identified Words:</strong> Specific words and phrases that our models flag as potential indicators of real or fake news.</p>
+                <p><strong>Model Confidence:</strong> We use three different AI models (DistilBERT and two RoBERTa variants) to analyze the text. The confidence score shows how many models agree on the classification.</p>
+            </div>
+
             <div class="input-area">
                 <label for="news-input">Enter Text Here:</label>
                 <textarea class="text-input" id="news-input" placeholder="Paste news article or text here..."></textarea>
             </div>
+            
             <div class="button-container">
                 <button class="button-a" id="analyze-button">Analyze</button>
                 <button class="button-a" id="clear-button">Clear</button>
             </div>
+
+            <div class="loading-indicator" id="loading-indicator">
+                Analyzing text...
+            </div>
+
             <div class="result" id="result-output"></div>
+            
+            <div class="model-results" id="model-results"></div>
+            
             <div class="percentage-container">
-                <div class="circular-progress" id="circular-progress"></div>
+                <div class="circular-progress" id="circular-progress">
+                    <div class="progress-label" id="progress-label"></div>
+                </div>
+                <div class="progress-disclaimer" id="progress-disclaimer">
+                    This percentage represents the agreement level among our three AI models in classifying this news article.
+                </div>
             </div>
         </div>
     </div>
@@ -178,60 +259,116 @@
         const textInput = document.getElementById('news-input');
         const resultOutput = document.getElementById('result-output');
         const circularProgress = document.getElementById('circular-progress');
+        const progressLabel = document.getElementById('progress-label');
         const analyzeButton = document.getElementById('analyze-button');
+        const modelResults = document.getElementById('model-results');
+        const explanationSection = document.getElementById('explanation-section');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const progressDisclaimer = document.getElementById('progress-disclaimer');
 
-        clearButton.addEventListener('click', function () {
+        function clearResults() {
             textInput.value = '';
             resultOutput.innerHTML = '';
+            modelResults.innerHTML = '';
             circularProgress.style.visibility = 'hidden';
-            circularProgress.style.setProperty('--progress-value', 0);
-        });
+            progressLabel.textContent = '';
+            explanationSection.style.display = 'block';
+            progressDisclaimer.style.display = 'none';
+        }
+
+        clearButton.addEventListener('click', clearResults);
 
         analyzeButton.addEventListener('click', async function () {
             const inputText = textInput.value.trim();
-            if (inputText) {
-                try {
-                    const response = await fetch('http://localhost:8000/classify', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ text: inputText }),
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-
-                    const data = await response.json();
-                    const result = data[0]; // Assuming the API returns an array with one object
-
-                    const isFake = !result.Ensemble; // Assuming 'true' means real news, 'false' means fake news
-                    const resultText = isFake ? "FAKE" : "REAL";
-                    const confidence = result.Confidence * 100;
-
-                    resultOutput.innerHTML = `<span class="result ${isFake ? 'false' : 'true'}">${resultText} NEWS</span>`;
-                    circularProgress.style.visibility = 'visible';
-
-                    circularProgress.style.setProperty('--progress-value', confidence.toFixed(0));
-
-                    const color = isFake ? 'red' : 'green';
-                    circularProgress.style.background = `
-                        radial-gradient(closest-side, rgba(237, 242, 244, 1) 79%, transparent 80% 100%),
-                        conic-gradient(${color} calc(var(--progress-value) * 1%), lightgrey 0)
-                    `;
-
-                    // Display additional information
-                    resultOutput.innerHTML += `<br><br>Confidence: ${confidence.toFixed(2)}%<br>`;
-                    resultOutput.innerHTML += `Latent Features: ${result['Latent Features']}<br>`;
-                    resultOutput.innerHTML += `Identified Words: ${result['Identified Words']}`;
-
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert("An error occurred while analyzing the text. Please try again.");
-                }
-            } else {
+            if (!inputText) {
                 alert("Please enter some text to analyze.");
+                return;
+            }
+
+            // Clear previous results and hide elements
+            resultOutput.innerHTML = '';
+            modelResults.innerHTML = '';
+            explanationSection.style.display = 'none';
+            loadingIndicator.style.display = 'block';
+            circularProgress.style.visibility = 'hidden';
+            progressLabel.textContent = '';
+            progressDisclaimer.style.display = 'none';
+
+            try {
+                const response = await fetch('http://localhost:8000/classify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: inputText }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const result = data[0];
+
+                // Display main result
+                const isFake = result.Ensemble;
+                const resultText = isFake ? "FAKE" : "REAL";
+                const confidence = result.Confidence * 100;
+
+                resultOutput.innerHTML = `<span class="${isFake ? 'result-fake' : 'result-real'}">${resultText} NEWS</span>`;
+
+                // Display individual model results
+                const modelResultsHTML = `
+                    <div class="model-card">
+                        <div class="model-name">DistilBERT</div>
+                        <div class="model-prediction ${result.DistilBERT ? 'prediction-fake' : 'prediction-real'}">
+                            ${result.DistilBERT ? 'FAKE' : 'REAL'} NEWS
+                        </div>
+                    </div>
+                    <div class="model-card">
+                        <div class="model-name">RoBERTa v1</div>
+                        <div class="model-prediction ${result['RoBERTa v1'] ? 'prediction-fake' : 'prediction-real'}">
+                            ${result['RoBERTa v1'] ? 'FAKE' : 'REAL'} NEWS
+                        </div>
+                    </div>
+                    <div class="model-card">
+                        <div class="model-name">RoBERTa v2</div>
+                        <div class="model-prediction ${result['RoBERTa v2'] ? 'prediction-fake' : 'prediction-real'}">
+                            ${result['RoBERTa v2'] ? 'FAKE' : 'REAL'} NEWS
+                        </div>
+                    </div>
+                `;
+                modelResults.innerHTML = modelResultsHTML;
+
+                // Update confidence indicator
+                circularProgress.style.visibility = 'visible';
+                progressDisclaimer.style.display = 'block';
+                circularProgress.setAttribute('data-value', confidence.toFixed(0));
+                
+                const color = isFake ? '#D22B2B' : '#2B8A3E';
+                circularProgress.style.background = `
+                    radial-gradient(closest-side, rgba(237, 242, 244, 1) 79%, transparent 80% 100%),
+                    conic-gradient(${color} ${confidence}%, lightgrey ${confidence}%)
+                `;
+                
+                // Update progress label with the same color as the result
+                progressLabel.textContent = resultText;
+                progressLabel.style.color = color;
+
+                // Display additional information
+                resultOutput.innerHTML += `
+                    <div style="font-size: 18px; margin-top: 20px;">
+                        <p><strong>Latent Features:</strong> ${result['Latent Features']}</p>
+                        <p><strong>Identified Words:</strong> ${result['Identified Words']}</p>
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('Error:', error);
+                resultOutput.innerHTML = '<span style="color: red;">An error occurred while analyzing the text. Please try again.</span>';
+                progressDisclaimer.style.display = 'none';
+            } finally {
+                loadingIndicator.style.display = 'none';
             }
         });
     </script>
