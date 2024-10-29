@@ -10,8 +10,6 @@ from Levenshtein import distance as levenshtein_distance
 from typing import Dict, Any, Tuple
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from dotenv import load_dotenv
-import os
 
 app = Flask(__name__)
 CORS(app)
@@ -39,14 +37,14 @@ def load_models():
 
     print("Loading models... This may take a few moments.")
     
-    distilbert_tokenizer = DistilBertTokenizer.from_pretrained('./Models/distilbert_finetuned_political')
-    distilbert_model = TFDistilBertForSequenceClassification.from_pretrained('./Models/distilbert_finetuned_political')
+    distilbert_tokenizer = DistilBertTokenizer.from_pretrained('./Models/PoliticalModels/distilbert_finetuned_political')
+    distilbert_model = TFDistilBertForSequenceClassification.from_pretrained('./Models/PoliticalModels/distilbert_finetuned_political')
 
-    roberta_tokenizer_v1 = RobertaTokenizer.from_pretrained('./Models/roberta_v1_finetuned_political')
-    roberta_model_v1 = TFRobertaForSequenceClassification.from_pretrained('./Models/roberta_v1_finetuned_political')
+    roberta_tokenizer_v1 = RobertaTokenizer.from_pretrained('./Models/PoliticalModels/roberta_v1_finetuned_political')
+    roberta_model_v1 = TFRobertaForSequenceClassification.from_pretrained('./Models/PoliticalModels/roberta_v1_finetuned_political')
 
-    roberta_tokenizer_v2 = RobertaTokenizer.from_pretrained('./Models/roberta_v2_finetuned_political')
-    roberta_model_v2 = TFRobertaForSequenceClassification.from_pretrained('./Models/roberta_v2_finetuned_political')
+    roberta_tokenizer_v2 = RobertaTokenizer.from_pretrained('./Models/PoliticalModels/roberta_v2_finetuned_political')
+    roberta_model_v2 = TFRobertaForSequenceClassification.from_pretrained('./Models/PoliticalModels/roberta_v2_finetuned_political')
 
     openai_client = OpenAI(api_key=API_KEY)
     
