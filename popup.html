@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            width: 400px;
+            font-family: Arial, sans-serif;
+            background-color: rgba(43, 45, 66, 1);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .content-box {
+            background: rgba(237, 242, 244, 1);
+            border-radius: 20px;
+            padding: 30px;
+        }
+
+        .header {
+            text-align: center;
+            font-size: 28px;
+            font-weight: 800;
+            color: rgba(43, 45, 66, 1);
+            margin-bottom: 10px;
+        }
+
+        .divider {
+            width: 100%;
+            height: 4px;
+            background-color: #D22B2B;
+            margin-bottom: 20px;
+        }
+
+        .input-area {
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .text-input {
+            width: 100%;
+            height: 80px;
+            padding: 10px;
+            font-size: 14px;
+            border-radius: 10px;
+            border: 2px solid rgba(43, 45, 66, 1);
+            margin-top: 10px;
+            resize: none;
+        }
+
+        .char-count {
+            font-size: 12px;
+            color: #666;
+            text-align: right;
+            margin-top: 4px;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .button {
+            flex: 1;
+            padding: 10px;
+            font-size: 14px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .analyze-button {
+            background-color: #D22B2B;
+        }
+
+        .clear-button {
+            background-color: #666;
+        }
+
+        .button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .fact-check-result {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: rgba(43, 45, 66, 0.05);
+            border-left: 4px solid #D22B2B;
+        }
+
+        .fact-check-result.real {
+            border-left-color: #2B8A3E;
+        }
+
+        .fact-verdict {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .fact-verdict.fake {
+            color: #D22B2B;
+        }
+
+        .fact-verdict.real {
+            color: #2B8A3E;
+        }
+
+        .fact-confidence {
+            margin: 15px 0;
+        }
+
+        .confidence-bar {
+            height: 6px;
+            background: #eee;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .confidence-value {
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .model-badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+
+        .model-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: white;
+            white-space: nowrap;
+        }
+
+        .model-badge.fake {
+            background-color: rgba(210, 43, 43, 0.8);
+        }
+
+        .model-badge.real {
+            background-color: rgba(43, 138, 62, 0.8);
+        }
+
+        .fact-additional {
+            font-size: 13px;
+            color: #666;
+            margin-top: 15px;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+
+        .fact-additional p {
+            margin: 8px 0;
+        }
+
+        .loading {
+            text-align: center;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #D22B2B;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="content-box">
+        <div class="header">FAKE NEWS DETECTOR</div>
+        <div class="divider"></div>
+
+        <div class="input-area">
+            <textarea class="text-input" id="news-input" placeholder="Paste text to analyze..."></textarea>
+            <div class="char-count" id="char-count">0/250 characters</div>
+        </div>
+
+        <div class="button-container">
+            <button class="button analyze-button" id="analyze-text">Analyze Text</button>
+            <button class="button clear-button" id="clear-text">Clear</button>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <div style="margin-top: 10px;">Analyzing...</div>
+        </div>
+
+        <div id="result-container"></div>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>
